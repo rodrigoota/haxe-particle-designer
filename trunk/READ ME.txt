@@ -1,0 +1,16 @@
+Haxe Particle Designer
+
+Cocos2d Haxe original source modified by Matthew Mourlam - Ancient Sheep / Mourlam Studios
+
+Sample particle engine code [1st argument - plist file name (not the path) 2nd argument, path to both the plist and the particle texture (both plist and png should be in same directory)):
+
+/**
+Be sure to put in trailing "/"" for assets path (2nd argument)
+**/
+
+var			particleSystem:ASParticleSystem;
+particleSystem = ASParticleSystem.particleWithFile("pinkStream.plist","assets/particles/");
+addChild(particleSystem);
+
+*** IMPORTANT ***
+When exporting system from Particle Designer, please uncheck "Embed Texture". If saving multiple particle systems to the same directory, you'll want to rename the Texture File Name, otherwise, you'll overwrite your previously saved particle engine texture.
