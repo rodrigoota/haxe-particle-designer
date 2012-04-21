@@ -1,8 +1,6 @@
 package;
 
 
-import com.eclecticdesignstudio.motion.Actuate;
-import com.eclecticdesignstudio.motion.easing.Quad;
 import nme.display.Sprite;
 import nme.display.StageAlign;
 import nme.display.StageQuality;
@@ -12,6 +10,7 @@ import nme.Lib;
 import nme.events.MouseEvent;
 import nme.Assets;
 import nme.ui.Mouse;
+import nme.geom.Point;
 
 import nme.display.Bitmap;
 import nme.display.BitmapData;
@@ -34,16 +33,41 @@ class Sample extends Sprite
 		Lib.current.stage.addEventListener (Event.ACTIVATE, stage_onActivate);
 		Lib.current.stage.addEventListener (Event.DEACTIVATE, stage_onDeactivate);
 
+		//Create a black background
+		var			bk:Sprite = new Sprite();
+		bk.graphics.beginFill(0x000000);
+		bk.graphics.drawRect(0,0,Lib.current.stage.stageWidth,Lib.current.stage.stageHeight);
+		bk.graphics.endFill();
+		addChild(bk);
+
 		//Create a particle system
 		//Pass the file name of the plist and the path for both the plist and the particle textures (.pngs)
 		/**
 		Be sure to put in trailing "/"" for assets path (2nd argument)
 		**/
-		particleSystem = ASParticleSystem.particleWithFile("pinkStream.plist","assets/particles/");
+		
+		particleSystem = ASParticleSystem.particleWithFile("tourni.plist","assets/particles/");
 		addChild(particleSystem);
+	
+		//Add our mouse move function
+		addEventListener(MouseEvent.MOUSE_MOVE,mMove);
+		addEventListener(MouseEvent.CLICK,firework);
+	}
+
+	public function mMove(evt:MouseEvent)
+	{
+		//trace("Moving to "+mouseX+", "+mouseY);
+		particleSystem.position = new Point(mouseX,mouseY);
 	}
 	
-	
+	public function firework(evt:MouseEvent)
+	{
+		var ps = ASParticleSystem.particleWithFile("forestFire.plist","assets/particles/");
+		
+		ps.position = new Point(mouseX,mouseY);
+		addChild(ps);
+	}
+
 	// Event Handlers
 	
 	private function stage_onActivate (event:Event):Void
