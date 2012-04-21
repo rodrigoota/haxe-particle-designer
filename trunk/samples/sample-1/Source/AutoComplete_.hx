@@ -46,12 +46,14 @@ class Sample extends Sprite
 		Be sure to put in trailing "/"" for assets path (2nd argument)
 		**/
 		
-		particleSystem = ASParticleSystem.particleWithFile("tourni.plist","assets/particles/");
+		particleSystem = ASParticleSystem.particleWithFile("comet.plist","assets/particles/");
 		addChild(particleSystem);
 	
 		//Add our mouse move function
 		addEventListener(MouseEvent.MOUSE_MOVE,mMove);
 		addEventListener(MouseEvent.CLICK,firework);
+
+
 	}
 
 	public function mMove(evt:MouseEvent)
@@ -62,7 +64,7 @@ class Sample extends Sprite
 	
 	public function firework(evt:MouseEvent)
 	{
-		var ps = ASParticleSystem.particleWithFile("forestFire.plist","assets/particles/");
+		var ps = ASParticleSystem.particleWithFile("comet.plist","assets/particles/");
 		
 		ps.position = new Point(mouseX,mouseY);
 		addChild(ps);

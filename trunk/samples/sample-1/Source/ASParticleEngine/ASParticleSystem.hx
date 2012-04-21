@@ -143,9 +143,9 @@ class ASParticleSystem extends Sprite
 	var mode :Mode;
 
 	// start ize of the particles
-	var startSize :Float;
+	public var startSize :Float;
 	// start Size variance
-	var startSizeVar :Float;
+	public var startSizeVar :Float;
 	// End size of the particle
 	var endSize :Float;
 	// end size of variance
