@@ -125,9 +125,7 @@ class ASParticleSystem extends Sprite
 	public var duration :Float;
 	// time elapsed since the start of the system (in seconds)
 	public var elapsed :Float;
-	
-	// position is from "superclass" CocosNode
-	public var sourcePosition :Point;
+
 	// Position variance
 	public var posVar :Point;
 
@@ -217,14 +215,16 @@ class ASParticleSystem extends Sprite
 	var 					particleBMD:BitmapData;
 	var 					drawList:Array<Float>;
 
+	public var 				addBlendMode:Bool;
+
 /** Is the emitter active */
 //public var active (get_active, null) :Bool;
 /** Quantity of particles that are being simulated at the moment */
 //public var particleCount (get_particleCount, set_particleCount) :Int;
 /** How many seconds the emitter wil run. -1 means 'forever' */
 //public var duration (get_duration, set_duration) :Float;
-/** sourcePosition of the emitter */
-//public var sourcePosition (get_sourcePosition, set_sourcePosition) :Point;
+/** position of the emitter */
+//public var position (get_position, set_position) :Point;
 /** Position variance of the emitter */
 //public var posVar (get_posVar, set_posVar) :Point;
 /** life, and life variation of each particle */
@@ -319,7 +319,7 @@ public function new()
 {
 	super();
 
-	trace("ASParticleSystem :: new");
+	//trace("ASParticleSystem :: new");
 }
 
 
@@ -331,7 +331,7 @@ public function new()
 public static function particleWithFile (plistFile:String,pAssets:String) :ASParticleSystem
 {
 	
-	trace("ASParticleSystem :: particleWithFile - "+plistFile + " - assets: "+pAssets);
+	//trace("ASParticleSystem :: particleWithFile - "+plistFile + " - assets: "+pAssets);
 
 	return new ASParticleSystem().initWithFile (plistFile,pAssets);
 }
@@ -346,7 +346,7 @@ public function initWithFile (plistFile:String,pAssets:String) :ASParticleSystem
 	
 	assetsPath = pAssets;
 	var path :String = pAssets+plistFile;
-	trace("ASParticleSystem :: particleWithFile - "+path);
+	//trace("ASParticleSystem :: particleWithFile - "+path);
 
 	var dict :NSDictionary = NSDictionary.dictionaryWithContentsOfFile (path );
 	
@@ -409,18 +409,18 @@ public function initWithDictionary (dictionary:NSDictionary) :ASParticleSystem
 	endSize = dictionary.valueForKey ( "finishParticleSize" );
 	endSizeVar = dictionary.valueForKey ( "finishParticleSizeVariance" );
 	
-	// position
+	// position variation
 	posVar = new Point();
-	//sourcePosition = new Point();
+	//position = new Point();
 
-	var x :Float = dictionary.valueForKey ( "sourcePositionx" );
-	var y :Float = dictionary.valueForKey ( "sourcePositiony" );
+	var x :Float = dictionary.valueForKey ( "positionx" );
+	var y :Float = dictionary.valueForKey ( "positiony" );
 	//this.position = new Point (x,y);
 
-	sourcePosition = new Point (x,y);
+	position = new Point (x,y);
 
-	posVar.x = dictionary.valueForKey ( "sourcePositionVariancex" );
-	posVar.y = dictionary.valueForKey ( "sourcePositionVariancey" );
+	posVar.x = dictionary.valueForKey ( "positionVariancex" );
+	posVar.y = dictionary.valueForKey ( "positionVariancey" );
 	
 	// Spinning
 	startSpin = dictionary.valueForKey ( "rotationStart" );
@@ -433,7 +433,7 @@ public function initWithDictionary (dictionary:NSDictionary) :ASParticleSystem
 	// Mode A: Gravity + tangential accel + radial accel
 	mode = {
 		A:{ gravity:new Point(), dir: new Point(), speed:.0, speedVar:.0, tangentialAccel:.0, tangentialAccelVar:.0, radialAccel:.0, radialAccelVar:.0 },
-		B:{startRadius:.0, startRadiusVar:.0, endRadius:.0, endRadiusVar:.0, rotatePerSecond:.0, rotatePerSecondVar:.0 }
+		B:{startRadius:.0, startRadiusVar:.0, endRadius:.0, endRadiusVar:.0, rotatePerSecond:.0, rotatePerSecondVar:.0,deltaRadius: .0,angle: .0,degreesPerSecond: .0,radius: .0 }
 	};
 	
 	if( emitterMode == kCCParticleModeGravity ) {
@@ -466,6 +466,9 @@ public function initWithDictionary (dictionary:NSDictionary) :ASParticleSystem
 	
 	// or Mode B: radius movement
 	else if( emitterMode == kCCParticleModeRadius ) {
+
+		trace("particle system - B");
+
 		var maxRadius :Float = dictionary.valueForKey ( "maxRadius" );
 		var maxRadiusVar :Float = dictionary.valueForKey ( "maxRadiusVariance" );
 		var minRadius :Float = dictionary.valueForKey ( "minRadius" );
@@ -488,8 +491,14 @@ public function initWithDictionary (dictionary:NSDictionary) :ASParticleSystem
 	// emission Rate
 	emissionRate = totalParticles/life;
 
+	//Set our blend mode
+	if(dictionary.valueForKey("blendFuncDestination") == "1" && dictionary.valueForKey("blendFuncSource") == 770)
+	{
+		addBlendMode = true;
+	}
 
-
+	else
+		addBlendMode = false;
 
 /**
 LOAD TEXTURE MAP ... ER TILE SHEET
@@ -501,7 +510,7 @@ Fix so that it uses texture map from plist
 	// Try to get the texture from the cache
 	var textureName :String = dictionary.valueForKey ( "textureFileName" );
 
-	trace("Texturename = "+textureName);
+	//trace("Texturename = "+textureName);
 
 	//Generate our tilesheet
 	particleBMD = Assets.getBitmapData(assetsPath+textureName);
@@ -601,7 +610,7 @@ public function addParticle () :Bool
 	var particle :ASParticle = new ASParticle();
 	particles.push(particle);
 	
-	trace("ParticleSystem :: addParticle");
+	//trace("ParticleSystem :: addParticle");
 
 	this.initParticle ( particle );		
 	particleCount++;
@@ -617,9 +626,9 @@ public function initParticle (particle:ASParticle)
 	particle.timeToLive = Math.max(0,particle.timeToLive);
 
 	// position
-	particle.pos.x = sourcePosition.x + posVar.x * ASMacros.RANDOM_MINUS1_1();
+	particle.pos.x = position.x + posVar.x * ASMacros.RANDOM_MINUS1_1();
 	particle.pos.x *= ASConfig.ASCONTENT_SCALE_FACTOR;
-	particle.pos.y = sourcePosition.y + posVar.y * ASMacros.RANDOM_MINUS1_1();
+	particle.pos.y = position.y + posVar.y * ASMacros.RANDOM_MINUS1_1();
 	particle.pos.y *= ASConfig.ASCONTENT_SCALE_FACTOR;
 	
 	// Color
@@ -714,13 +723,13 @@ public function initParticle (particle:ASParticle)
 	// Mode Radius: B
 	else {
 		// Set the default diameter of the particle from the source position
-		/*var startRadius :Float = mode.B.startRadius + mode.B.startRadiusVar * ASMacros.RANDOM_MINUS1_1();
+		var startRadius :Float = mode.B.startRadius + mode.B.startRadiusVar * ASMacros.RANDOM_MINUS1_1();
 		var endRadius :Float = mode.B.endRadius + mode.B.endRadiusVar * ASMacros.RANDOM_MINUS1_1();
 
 		startRadius *= ASConfig.ASCONTENT_SCALE_FACTOR;
 		endRadius *= ASConfig.ASCONTENT_SCALE_FACTOR;
 		
-		particle.mode.B.startRadius = startRadius;
+		particle.mode.B.radius = startRadius;
 
 		if( mode.B.endRadius == kCCParticleStartRadiusEqualToEndRadius )
 			particle.mode.B.deltaRadius = 0;
@@ -729,7 +738,7 @@ public function initParticle (particle:ASParticle)
 	
 		particle.mode.B.angle = a;
 		particle.mode.B.degreesPerSecond = ASMacros.ASDEGREES_TO_RADIANS (mode.B.rotatePerSecond + mode.B.rotatePerSecondVar * ASMacros.RANDOM_MINUS1_1());
-		*/
+		
 	}	
 }
 
@@ -748,18 +757,6 @@ public function draw()
 {
 	//Clear context
 	graphics.clear();
-
-	//Loop through each particle and position it accordingly
-
-	trace("draw particle - "+particles[0].pos.x+", "+particles[0].pos.y);
-
-	/*for(i in 0...particles.length)
-	{
-		var particle:ASParticle = particles[i];
-
-		particles[i].test.x = particles[i].pos.x;
-		particles[i].test.y = particles[i].pos.y;
-	}*/
 
 	var TILE_FIELDS = 9; // x+y+index+scale+rotation+alpha
 	var particle;
@@ -782,8 +779,15 @@ public function draw()
 		drawList[index + 8] = 1.0;			//Alpha
 	}
 	
-	tilesheet.drawTiles(graphics, drawList, true, 
-		Tilesheet.TILE_SCALE | Tilesheet.TILE_ROTATION | Tilesheet.TILE_ALPHA | Tilesheet.TILE_RGB);
+
+//draw our particle system
+	if(addBlendMode == true)
+		tilesheet.drawTiles(graphics, drawList, true, 
+		Tilesheet.TILE_SCALE | Tilesheet.TILE_ROTATION | Tilesheet.TILE_ALPHA | Tilesheet.TILE_RGB | Tilesheet.TILE_BLEND_ADD);
+
+	else
+		tilesheet.drawTiles(graphics, drawList, true, 
+		Tilesheet.TILE_SCALE | Tilesheet.TILE_ROTATION | Tilesheet.TILE_ALPHA | Tilesheet.TILE_RGB | Tilesheet.TILE_BLEND_NORMAL);
 
 }
 
@@ -816,7 +820,7 @@ inline public function isFull () :Bool
 // ParticleSystem - MainLoop
 public function update ( dt:Float )
 {
-	trace("ASParticleSystem - update");
+	//trace("ASParticleSystem - update");
 
 	if( active && emissionRate > 0 ) {
 		var rate :Float = 1.0 / emissionRate;
@@ -848,7 +852,7 @@ public function update ( dt:Float )
 		currentPosition.y *= ASConfig.ASCONTENT_SCALE_FACTOR;
 	}
 
-	trace("Updating particles - particleCount = "+particleCount + " - actual count = "+particles.length);
+	//trace("Updating particles - particleCount = "+particleCount + " - actual count = "+particles.length);
 	
 	while( particleIdx < particleCount )
 	{
@@ -895,15 +899,12 @@ public function update ( dt:Float )
 			
 			// Mode B: radius movement
 			else {			
-
-				trace("Mode B is NOT supported yet! - Matthew Mourlam")
-
 				// Update the angle and radius of the particle.
-				/*p.mode.B.angle += p.mode.B.degreesPerSecond * dt;
+				p.mode.B.angle += p.mode.B.degreesPerSecond * dt;
 				p.mode.B.radius += p.mode.B.deltaRadius * dt;
 				
 				p.pos.x = - Math.cos(p.mode.B.angle) * p.mode.B.radius;
-				p.pos.y = - Math.sin(p.mode.B.angle) * p.mode.B.radius;*/
+				p.pos.y = - Math.sin(p.mode.B.angle) * p.mode.B.radius;
 			}
 			
 			// color
@@ -944,7 +945,7 @@ UPDATE PARTICLE IN EITHER POINT OR QUAD SYSTEM
 		} else {
 			// life < 0
 
-			trace("Life < 0");
+			//trace("Life < 0");
 
 			//If this is not the last particle
 			if( particleIdx != particleCount-1 )

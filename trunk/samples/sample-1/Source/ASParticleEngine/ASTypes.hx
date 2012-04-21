@@ -48,7 +48,15 @@ typedef B = {
 	var endRadiusVar :Float ;
 	var rotatePerSecond :Float;
 	var rotatePerSecondVar :Float;
+
+
+	//Custom vars not included in plist
+	var deltaRadius:Float;
+	var angle:Float;
+	var degreesPerSecond:Float;
+	var radius:Float;
 }
+
 typedef Mode = {
 	var A :A;
 	var B :B;
