@@ -781,7 +781,7 @@ public function draw()
 		drawList[index + 5] = particle.color.r;
 		drawList[index + 6] = particle.color.g;
 		drawList[index + 7] = particle.color.b;
-		drawList[index + 8] = 1.0;			//Alpha
+		drawList[index + 8] = particle.color.a;			//Alpha
 	}
 	
 
