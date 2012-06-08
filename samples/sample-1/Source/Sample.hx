@@ -8,6 +8,7 @@ import nme.display.StageScaleMode;
 import nme.events.Event;
 import nme.Lib;
 import nme.events.MouseEvent;
+import nme.events.KeyboardEvent;
 import nme.Assets;
 import nme.ui.Mouse;
 import nme.geom.Point;
@@ -19,11 +20,37 @@ class Sample extends Sprite
 {
 	var			particleSystem:ASParticleSystem;
 
+	var			systems:Array<String>;
+	var			currIndex:Int;
+
 	public function new()
 	{
 		super ();
 
+		currIndex = 0;
+		systems = new Array();
+		systems.push("comet.plist");
+		systems.push('crazy.plist');
+		systems.push("electrons.plist");
+		systems.push('galaxy.plist');
+		systems.push('airStars.plist');
+		systems.push('boil.plist');
+		systems.push('emit.plist');
+		systems.push('fire.plist');
+		systems.push('fireForest.plist');
+		systems.push('Firework.plist');
+		systems.push('pinkStream.plist');
+		systems.push('pop.plist');
+		systems.push('space.plist');
+		systems.push('starLines.plist');
+		systems.push('tourni.plist');
+		systems.push('waterfall.plist');
+
+
+
 		init();
+
+		addEventListener(Event.ADDED_TO_STAGE,addToStage);
 	}
 
 	private function init()
@@ -45,8 +72,10 @@ class Sample extends Sprite
 		/**
 		Be sure to put in trailing "/"" for assets path (2nd argument)
 		**/
+
 		
-		particleSystem = ASParticleSystem.particleWithFile("blizzard.plist","assets/particles/");
+		
+		particleSystem = ASParticleSystem.particleWithFile("galaxy.plist","assets/particles/");
 		addChild(particleSystem);
 	
 		//Add our mouse move function
@@ -56,15 +85,46 @@ class Sample extends Sprite
 
 	}
 
+	public function addToStage(evt:KeyboardEvent)
+	{
+		removeEventListener(Event.ADDED_TO_STAGE,addToStage);
+		stage.addEventListener(KeyboardEvent.KEY_DOWN,switchParticles);
+	}
+
+	public function switchParticles(key:KeyboardEvent)
+	{
+		trace("Keydown - "+currIndex);
+
+		if(particleSystem!=null)
+		{
+			removeChild(particleSystem);
+			particleSystem.destroy();
+			particleSystem = null;
+		}
+
+		//Create new particle engine
+		currIndex++;
+		if(currIndex>=systems.length)
+			currIndex = 0;
+
+		trace("currIndex="+currIndex);
+
+		var			psystem:String = systems[currIndex];
+
+		particleSystem = ASParticleSystem.particleWithFile(psystem,"assets/particles/");
+		addChild(particleSystem);
+	}
+
 	public function mMove(evt:MouseEvent)
 	{
 		//trace("Moving to "+mouseX+", "+mouseY);
-		particleSystem.position = new Point(mouseX,mouseY);
+		if(particleSystem!=null)
+			particleSystem.position = new Point(mouseX,mouseY);
 	}
 	
 	public function firework(evt:MouseEvent)
 	{
-		var ps = ASParticleSystem.particleWithFile("comet.plist","assets/particles/");
+		var ps = ASParticleSystem.particleWithFile(systems[currIndex],"assets/particles/");
 		
 		ps.position = new Point(mouseX,mouseY);
 		addChild(ps);

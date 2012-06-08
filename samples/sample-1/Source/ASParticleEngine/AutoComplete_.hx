@@ -600,6 +600,7 @@ public function initWithTotalParticles ( numberOfParticles:Int ) :ASParticleSyst
 
 public function destroy () :Void
 {
+	trace("ASParticleEngine :: destroy")
 	particles = null;
 	texture_ = null;
 }
