@@ -46,7 +46,7 @@ class Sample extends Sprite
 		Be sure to put in trailing "/"" for assets path (2nd argument)
 		**/
 		
-		particleSystem = ASParticleSystem.particleWithFile("comet.plist","assets/particles/");
+		particleSystem = ASParticleSystem.particleWithFile("blizzard.plist","assets/particles/");
 		addChild(particleSystem);
 	
 		//Add our mouse move function
