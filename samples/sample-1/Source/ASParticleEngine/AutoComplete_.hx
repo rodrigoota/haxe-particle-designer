@@ -143,9 +143,9 @@ class ASParticleSystem extends Sprite
 	var mode :Mode;
 
 	// start ize of the particles
-	var startSize :Float;
+	public var startSize :Float;
 	// start Size variance
-	var startSizeVar :Float;
+	public var startSizeVar :Float;
 	// End size of the particle
 	var endSize :Float;
 	// end size of variance
@@ -437,9 +437,12 @@ public function initWithDictionary (dictionary:NSDictionary) :ASParticleSystem
 	};
 	
 	if( emitterMode == kCCParticleModeGravity ) {
+
+		trace("particle system - A");
+
 		// gravity
 		mode.A.gravity.x = dictionary.valueForKey ( "gravityx" );
-		mode.A.gravity.y = dictionary.valueForKey ( "gravityy" );
+		mode.A.gravity.y = -dictionary.valueForKey ( "gravityy" );
 		//mode.A.gravity.y *= -1;
 
 
@@ -697,7 +700,9 @@ public function initParticle (particle:ASParticle)
 
 
 	// direction
-	var a :Float = ASMacros.ASDEGREES_TO_RADIANS( angle + angleVar * ASMacros.RANDOM_MINUS1_1() );	
+
+	//Custom hack to match particle designer / cocos 2d angle 90 degrees shoots upwards, not downards as expected
+	var a :Float = ASMacros.ASDEGREES_TO_RADIANS( 360 - (angle + angleVar * ASMacros.RANDOM_MINUS1_1()) );	
 
 	// Mode Gravity: A
 	if( emitterMode == kCCParticleModeGravity ) {
@@ -776,7 +781,7 @@ public function draw()
 		drawList[index + 5] = particle.color.r;
 		drawList[index + 6] = particle.color.g;
 		drawList[index + 7] = particle.color.b;
-		drawList[index + 8] = 1.0;			//Alpha
+		drawList[index + 8] = particle.color.a;			//Alpha
 	}
 	
 
